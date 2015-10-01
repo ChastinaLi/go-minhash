@@ -1,6 +1,10 @@
 package minhash
 
-import "math"
+import (
+		"math"
+		"encoding/gob"
+    "bytes"
+	)
 
 // MinWise is a collection of minimum hashes for a set
 type MinWise struct {
@@ -13,7 +17,6 @@ type Hash64 func([]byte) uint64
 
 // NewMinWise returns a new MinWise Hashsing implementation
 func NewMinWise(h1, h2 Hash64, size int) *MinWise {
-
 	minimums := make([]uint64, size)
 	for i := range minimums {
 		minimums[i] = math.MaxUint64
@@ -150,4 +153,27 @@ func SimilarityBbit(sig1, sig2 []uint64, b uint) float64 {
 	}
 
 	return float64(intersect) / float64(count)
+}
+
+// Serialize the MinHash signature to bytes stored in buffer
+func (m *MinWise) Serialize() ([]byte, error) {
+  buffer := new(bytes.Buffer)
+	enc := gob.NewEncoder(buffer)
+  err := enc.Encode(m.minimums)
+  if err != nil {
+      return nil, err
+  }
+  return buffer.Bytes(), nil
+}
+
+// Deserialize reconstructs a MinHash signature from the buffer
+func Deserialize(buf []byte) (*MinWise, error) {
+	buffer := bytes.NewBuffer(buf)
+	m := new(MinWise)
+	dec := gob.NewDecoder(buffer)
+	err := dec.Decode(m.minimums)
+  if err != nil {
+      return nil, err
+  }
+  return m, nil
 }

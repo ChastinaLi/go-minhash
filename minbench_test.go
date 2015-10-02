@@ -20,12 +20,12 @@ func init() {
 		hash64a.Write(b)
 		return hash64a.Sum64()
 	}
-  hash64 := fnv.New64()
-  h2 = func(b []byte) uint64 {
-    hash64.Reset()
-    hash64.Write(b)
-    return hash64.Sum64()
-  }
+	hash64 := fnv.New64()
+	h2 = func(b []byte) uint64 {
+	  hash64.Reset()
+	  hash64.Write(b)
+	  return hash64.Sum64()
+	}
 }
 
 func randSeq(n int) string {

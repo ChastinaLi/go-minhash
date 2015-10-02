@@ -56,9 +56,6 @@ func benchmark(minhashSize int, b *testing.B) {
 	est := m1.Similarity(m2)
 	act := float64(number+1) / float64(len(d))
 	err := math.Abs(act - est)
-	fmt.Printf("Data size: %8d, ", b.N)
-	fmt.Printf("Real: %.8f, ", act)
-	fmt.Printf("Estimated: %.8f, ", est)
 	fmt.Printf("Error: %.8f\n", err)
 
 	bytearray, _ := m1.Serialize()

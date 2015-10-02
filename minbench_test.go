@@ -4,35 +4,45 @@ import (
 	"fmt"
 	"hash/fnv"
 	"math"
+	"math/rand"
 	"testing"
+	"reflect"
 )
 
 var h1, h2 Hash64
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 func init() {
-	fnvHash64a := fnv.New64a()
+	hash64a := fnv.New64a()
 	h1 = func(b []byte) uint64 {
-		fnvHash64a.Reset()
-		fnvHash64a.Write(b)
-		return fnvHash64a.Sum64()
+		hash64a.Reset()
+		hash64a.Write(b)
+		return hash64a.Sum64()
 	}
-  fnvHash64 := fnv.New64()
+  hash64 := fnv.New64()
   h2 = func(b []byte) uint64 {
-    fnvHash64.Reset()
-    fnvHash64.Write(b)
-    return fnvHash64.Sum64()
+    hash64.Reset()
+    hash64.Write(b)
+    return hash64.Sum64()
   }
 }
 
-func data(size int) [][]byte {
-	d := make([][]byte, size)
-	for i := range d {
-		d[i] = []byte(fmt.Sprintf("salt%d %d", i, size))
+func randSeq(n int) string {
+  b := make([]rune, n)
+  for i := range b {
+      b[i] = letters[rand.Intn(len(letters))]
+  }
+  return string(b)
+}
+
+func data(size int) {
+	for i := range size {
+		Generate_hash(randSeq(10))
 	}
-	return d
 }
 
 func hashing(mh *MinWise, start, end int, data [][]byte) {
+	fmt.Println(data)
 	for i := start; i < end; i++ {
 		mh.Push(data[i])
 	}
@@ -56,7 +66,6 @@ func benchmark(minhashSize int, b *testing.B) {
 	hashing(m1, a_start, a_end, d)
 	hashing(m2, b_start, b_end, d)
 
-	fmt.Println(m1)
 	est := m1.Similarity(m2)
 	act := float64(a_end-b_start) / float64(b_end-a_start)
 	err := math.Abs(act - est)
@@ -66,9 +75,8 @@ func benchmark(minhashSize int, b *testing.B) {
 	fmt.Printf("Error: %.8f\n", err)
 
 	bytearray, _ := m1.Serialize()
-	fmt.Println(bytearray)
-	minwise, _ := Deserialize(bytearray)
-	fmt.Println(minwise.minimums)
+	m1_deserialized, _ := Deserialize(bytearray)
+	fmt.Println(reflect.DeepEqual(m1_deserialized.minimums , m1.minimums))
 }
 
 func BenchmarkMinWise64(b *testing.B) {

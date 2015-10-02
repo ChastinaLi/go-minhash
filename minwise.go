@@ -31,7 +31,6 @@ func NewMinWise(h1, h2 Hash64, size int) *MinWise {
 
 // Push adds an element to the set.
 func (m *MinWise) Push(b []byte) {
-
 	v1 := m.h1(b)
 	v2 := m.h2(b)
 
@@ -155,6 +154,19 @@ func SimilarityBbit(sig1, sig2 []uint64, b uint) float64 {
 	return float64(intersect) / float64(count)
 }
 
+func Generate_hash(m *MinWise, data string) {
+		m.Push([]byte(data))
+}
+
+func data(size int) [][]byte {
+
+	d := make([][]byte, size)
+	for i := range d {
+		d[i] = []byte(randSeq(10))
+	}
+	return d
+}
+
 // Serialize the MinHash signature to bytes stored in buffer
 func (m *MinWise) Serialize() ([]byte, error) {
   buffer := new(bytes.Buffer)
@@ -171,7 +183,7 @@ func Deserialize(buf []byte) (*MinWise, error) {
 	buffer := bytes.NewBuffer(buf)
 	m := new(MinWise)
 	dec := gob.NewDecoder(buffer)
-	err := dec.Decode(m.minimums)
+	err := dec.Decode(&m.minimums)
   if err != nil {
       return nil, err
   }

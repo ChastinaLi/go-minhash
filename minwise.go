@@ -16,29 +16,28 @@ type MinWise struct {
 type Hash64 func([]byte) uint64
 
 // NewMinWise returns a new MinWise Hashsing implementation
-func NewMinWise(h1, h2 Hash64, size int) *MinWise {
+func NewMinWise(h1, h2 Hash64, size int, data [][]byte) *MinWise {
 	minimums := make([]uint64, size)
 	for i := range minimums {
 		minimums[i] = math.MaxUint64
+	}
+
+	for i := range data {
+		b := data[i]
+		v1 := h1(b)
+		v2 := h2(b)
+		for i, v := range minimums {
+			hv := v1 + uint64(i)*v2
+			if hv < v {
+				minimums[i] = hv
+			}
+		}
 	}
 
 	return &MinWise{
 		h1:       h1,
 		h2:       h2,
 		minimums: minimums,
-	}
-}
-
-// Push adds an element to the set.
-func (m *MinWise) Push(b []byte) {
-	v1 := m.h1(b)
-	v2 := m.h2(b)
-
-	for i, v := range m.minimums {
-		hv := v1 + uint64(i)*v2
-		if hv < v {
-			m.minimums[i] = hv
-		}
 	}
 }
 
@@ -152,19 +151,6 @@ func SimilarityBbit(sig1, sig2 []uint64, b uint) float64 {
 	}
 
 	return float64(intersect) / float64(count)
-}
-
-func Generate_hash(m *MinWise, data string) {
-		m.Push([]byte(data))
-}
-
-func data(size int) [][]byte {
-
-	d := make([][]byte, size)
-	for i := range d {
-		d[i] = []byte(randSeq(10))
-	}
-	return d
 }
 
 // Serialize the MinHash signature to bytes stored in buffer
